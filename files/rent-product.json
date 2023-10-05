@@ -1,0 +1,9 @@
+{
+	"data": {
+		"database": {
+			"slave": "postgresql://postgres:password@0.0.0.0:5432/postgres?sslmode=disable&search_path=public",
+			"master": "postgresql://postgres:password@0.0.0.0:5432/postgres?sslmode=disable&search_path=public",
+			"prefix": "rp_"
+		} 
+	}
+}
