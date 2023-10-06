@@ -48,7 +48,7 @@ func main() {
 	fmt.Println("Starting server ......")
 	http.HandleFunc("/product", prodHandler.ProductAvailability)
 
-	log.Fatalln(http.ListenAndServe(":8080", nil))
+	log.Fatalln(http.ListenAndServe(":3333", nil))
 }
 
 func homePage(w http.ResponseWriter, r *http.Request) {

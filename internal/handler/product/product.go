@@ -34,6 +34,8 @@ func (h *ProductHandler) ProductAvailability(w http.ResponseWriter, r *http.Requ
 		fmt.Fprintf(w, err.Error())
 	}
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Method", "GET")
 	w.WriteHeader(http.StatusOK)
 	w.Write(responseJson)
 }
