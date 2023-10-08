@@ -37,6 +37,10 @@ Query Param
 - year :selected year
 ```
 
+The following screenshots show you how to test the APIs using Postman.
+
+![api-getstock](img/api-getstock.PNG "api-getstock")
+
 ## Installation
 
 To set up this project locally, follow these steps:
@@ -45,5 +49,7 @@ To set up this project locally, follow these steps:
 - Run command `go mod tidy`
 - Create database by following [this configuration](../rent-product/files/rent-product.json)
 - Create table and data using [this query](../rent-product/initdb/init.sql)
-- Run command `go run main.go` and visit http://localhost:3333/ to hit the endpoint
+- Run command `go run main.go`
 - If you have docker installed on your computer, you just need to run this command : `docker-compose up`
+
+The application will start on the default port 3333.
