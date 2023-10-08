@@ -26,4 +26,7 @@ INSERT INTO rp_stock_item  (product_id) VALUES (1);
 INSERT INTO rp_stock_item  (product_id) VALUES (1);
 
 INSERT INTO rp_order (stock_item_id, start_date, end_date) VALUES (1, '02-10-2023', '10-10-2023');
-INSERT INTO rp_order (stock_item_id, start_date, end_date) VALUES (2, '05-10-2023', '15-10-2023');
+INSERT INTO rp_order (stock_item_id, start_date, end_date) VALUES (2, '02-10-2023', '10-10-2023');
+INSERT INTO rp_order (stock_item_id, start_date, end_date) VALUES (3, '02-10-2023', '10-10-2023');
+INSERT INTO rp_order (stock_item_id, start_date, end_date) VALUES (4, '02-10-2023', '10-10-2023');
+INSERT INTO rp_order (stock_item_id, start_date, end_date) VALUES (2, '12-10-2023', '15-10-2023');

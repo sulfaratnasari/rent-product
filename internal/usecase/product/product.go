@@ -6,6 +6,7 @@ import (
 	"rent-product/internal/entity/product"
 	"rent-product/internal/entity/stock_item"
 	"rent-product/internal/interface/repo"
+	"sync"
 	"time"
 
 	"github.com/pkg/errors"
@@ -27,6 +28,7 @@ var mapMonthDays = map[int]int{
 }
 
 type Usecase struct {
+	ProductDB   repo.ProductDB
 	OrderDB     repo.OrderDB
 	StockItemDB repo.StockItemDB
 }
@@ -52,14 +54,41 @@ func (uc *Usecase) ProductAvailabilityList(ctx context.Context, productID int64,
 	stockItemData := []stock_item.StockAvailability{}
 	totalDays := mapMonthDays[month]
 
-	for i := 1; i <= int(totalDays); i++ {
-		dateToCheck := time.Date(year, time.Month(month), i, 0, 0, 0, 0, time.UTC)
-		unavailableStock := checkUnavailableStock(orderList, dateToCheck)
-		stockForCurrentDate := stock_item.StockAvailability{
-			Date:           dateToCheck,
-			AvailableStock: totalStockItem - unavailableStock,
-		}
-		stockItemData = append(stockItemData, stockForCurrentDate)
+	// Create a WaitGroup to synchronize Goroutines
+	var wg sync.WaitGroup
+
+	// Create a channel to collect stock item data
+	stockItemDataCh := make(chan stock_item.StockAvailability, totalDays)
+
+	// Loop through each day in the month
+	for i := 1; i <= totalDays; i++ {
+		wg.Add(1) // Increment WaitGroup counter for each Goroutine
+
+		go func(day int) {
+			defer wg.Done() // Decrement WaitGroup counter when Goroutine completes
+
+			dateToCheck := time.Date(year, time.Month(month), day, 0, 0, 0, 0, time.UTC)
+			unavailableStock := checkUnavailableStock(orderList, dateToCheck)
+
+			stockForCurrentDate := stock_item.StockAvailability{
+				Date:           dateToCheck,
+				AvailableStock: totalStockItem - unavailableStock,
+			}
+
+			// Send the stock item data to the channel
+			stockItemDataCh <- stockForCurrentDate
+		}(i)
+	}
+
+	// Close the channel when all Goroutines are done
+	go func() {
+		wg.Wait()
+		close(stockItemDataCh)
+	}()
+
+	// Collect and process stock item data from the channel
+	for stock := range stockItemDataCh {
+		stockItemData = append(stockItemData, stock)
 	}
 
 	productAvailability.ProductID = productID
@@ -83,4 +112,21 @@ func checkUnavailableStock(orderList []*order.Order, date time.Time) (unavailabl
 	}
 
 	return unavailableStock
+}
+
+func (uc *Usecase) AddProduct(ctx context.Context, product product.Product) (err error) {
+
+	_, err = uc.ProductDB.Add(ctx, product)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (uc *Usecase) ProductList(ctx context.Context) (productList []*product.Product, err error) {
+	err = uc.ProductDB.GetProductList(ctx, &productList)
+	if err != nil {
+		return nil, err
+	}
+	return productList, nil
 }

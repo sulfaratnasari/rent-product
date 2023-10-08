@@ -20,6 +20,8 @@ func (conn *Conn) GetOrderListByProductID(ctx context.Context, productID int64, 
 	xormObj.Join("INNER", "rp_stock_item", "rp_order.stock_item_id=rp_stock_item.id")
 	xormObj.Join("INNER", "rp_product", "rp_stock_item.product_id=rp_product.id")
 	xormObj.Where("rp_product.id = ?", productID)
+	xormObj.And("extract (MONTH from rp_order.start_date) = ?", month)
+	xormObj.And("extract (YEAR from rp_order.start_date) =?", year)
 
 	err = xormObj.Find(orderList)
 	if err != nil {

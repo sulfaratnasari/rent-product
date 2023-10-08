@@ -12,10 +12,13 @@ import (
 	"rent-product/internal/entity/constant"
 	producthandler "rent-product/internal/handler/product"
 	orderrepo "rent-product/internal/repo/order"
+	productrepo "rent-product/internal/repo/product"
 	stockitemrepo "rent-product/internal/repo/stock_item"
 	productuc "rent-product/internal/usecase/product"
 	xdb "rent-product/lib/database/xorm"
 	"strings"
+
+	"github.com/gorilla/mux"
 )
 
 func main() {
@@ -37,18 +40,28 @@ func main() {
 	stockItemDB.DB.Master = xormConn.Master
 	stockItemDB.DB.Slave = xormConn.Slave
 
+	productDB := &productrepo.Conn{
+		DB: xormConn,
+	}
+	productDB.DB.Master = xormConn.Master
+	productDB.DB.Slave = xormConn.Slave
+
 	productUc := productuc.New(&productuc.Usecase{
 		OrderDB:     orderDB,
 		StockItemDB: stockItemDB,
+		ProductDB:   productDB,
 	})
 	prodHandler := producthandler.New(&producthandler.ProductHandler{
 		ProductUC: productUc,
 	})
 
+	r := mux.NewRouter()
 	fmt.Println("Starting server ......")
-	http.HandleFunc("/product", prodHandler.ProductAvailability)
+	r.HandleFunc("/product/{id}", prodHandler.ProductAvailability).Methods("GET")
+	r.HandleFunc("/product/add", prodHandler.AddProduct).Methods("POST")
+	r.HandleFunc("/list/product", prodHandler.ListProduct).Methods("GET")
 
-	log.Fatalln(http.ListenAndServe(":3333", nil))
+	log.Fatalln(http.ListenAndServe(":3333", r))
 }
 
 func homePage(w http.ResponseWriter, r *http.Request) {
